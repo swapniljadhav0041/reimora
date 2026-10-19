@@ -1,5 +1,6 @@
 # Reimora
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swapniljadhav0041/reimora)
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fswapniljadhav0041%2Freimora&env=VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID)
 
 > Modern University Reimbursement & Financial Governance Platform built with TanStack Start, React 19, Tailwind CSS v4, Nitro, and Supabase.
