@@ -1,26 +1,72 @@
 # Reimora
 
-Implement exactly the screenshot and nothing else
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fswapniljadhav0041%2Freimora&env=VITE_SUPABASE_URL,VITE_SUPABASE_PUBLISHABLE_KEY,VITE_SUPABASE_PROJECT_ID)
 
-This project was built with [Lovable](https://lovable.dev).
+> Modern University Reimbursement & Financial Governance Platform built with TanStack Start, React 19, Tailwind CSS v4, Nitro, and Supabase.
 
-**Live app**: https://reimora.lovable.app
+---
 
-## Build with Lovable
+## 🚀 One-Click Deployment on Vercel
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/de909860-ee10-437a-8607-773af972194a).
+### Step 1: Import Repository
+1. Navigate to **[vercel.com/new](https://vercel.com/new)**.
+2. Sign in with your GitHub account (`swapniljadhav0041`).
+3. Click **Import** next to `swapniljadhav0041/reimora` (or use [this direct link](https://vercel.com/new/import?s=https%3A%2F%2Fgithub.com%2Fswapniljadhav0041%2Freimora)).
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+### Step 2: Configure Build Settings
+- **Framework Preset**: `Other` or `Vite` (Nitro automatically configures the Vercel Build Output API v3).
+- **Build Command**: `npm run build`
+- **Output Directory**: Leave empty or `.vercel/output` (automatically detected).
+- **Install Command**: `npm install`
 
-## Development
+### Step 3: Configure Environment Variables
+Add the following variables under **Environment Variables**:
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+| Variable Name | Value |
+|---|---|
+| `VITE_SUPABASE_URL` | `https://gkovtgloqxpsgfrvsvug.supabase.co` |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP` |
+| `VITE_SUPABASE_PROJECT_ID` | `gkovtgloqxpsgfrvsvug` |
+| `SUPABASE_URL` | `https://gkovtgloqxpsgfrvsvug.supabase.co` |
+| `SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP` |
+| `SUPABASE_PROJECT_ID` | `gkovtgloqxpsgfrvsvug` |
+
+### Step 4: Click Deploy
+Click **Deploy**. Vercel will automatically build the site in seconds and provide a live production URL (e.g., `https://reimora-swapniljadhav0041.vercel.app`).
+
+---
+
+## 💻 Local Development
+
+Ensure you have Node.js 20+ and npm installed:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+# Clone your repository
+git clone https://github.com/swapniljadhav0041/reimora.git
+cd reimora
+
+# Install dependencies
+npm install
+
+# Run locally in dev mode
 npm run dev
+
+# Run automated tests
+npm test
+
+# Type-check & lint
+npx tsc --noEmit
+npm run lint
+
+# Production build
+npm run build
 ```
+
+---
+
+## 🛠️ Architecture
+- **Framework**: TanStack Start (Full-stack SSR React 19)
+- **Engine**: Nitro Server v3 + Vite 8
+- **Styling**: Tailwind CSS v4 + Tw-Animate-CSS
+- **Database & Auth**: Supabase (PostgreSQL, Storage, RLS)
+- **Icons & Visuals**: Lucide React, Recharts, Sonner
