@@ -36,6 +36,35 @@ Click **Deploy**. Vercel will automatically build the site in seconds and provid
 
 ---
 
+## 🟣 Deploy to Render (Web Service)
+
+### Option A: 1-Click Blueprint (Recommended)
+1. Go to **[Render New Blueprint](https://dashboard.render.com/select-repo?type=blueprint)**.
+2. Select your repository: `swapniljadhav0041/reimora`.
+3. Render will automatically read [`render.yaml`](./render.yaml), configure the service name, build commands, and Supabase environment variables on the free tier!
+4. Click **Apply**. Your app will build and deploy live at `https://reimora-<unique-id>.onrender.com`.
+
+### Option B: Manual Web Service
+1. Go to **[Render New Web Service](https://dashboard.render.com/select-repo?type=web)** and connect `swapniljadhav0041/reimora`.
+2. Configure settings:
+   - **Environment**: `Node`
+   - **Branch**: `main`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `node .output/server/index.mjs` (or `npm start`)
+   - **Instance Type**: `Free`
+3. Add Environment Variables:
+   - `NITRO_PRESET`: `render_com`
+   - `NODE_VERSION`: `20`
+   - `VITE_SUPABASE_URL`: `https://gkovtgloqxpsgfrvsvug.supabase.co`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP`
+   - `VITE_SUPABASE_PROJECT_ID`: `gkovtgloqxpsgfrvsvug`
+   - `SUPABASE_URL`: `https://gkovtgloqxpsgfrvsvug.supabase.co`
+   - `SUPABASE_PUBLISHABLE_KEY`: `sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP`
+   - `SUPABASE_PROJECT_ID`: `gkovtgloqxpsgfrvsvug`
+4. Click **Create Web Service**.
+
+---
+
 ## 💻 Local Development
 
 Ensure you have Node.js 20+ and npm installed:

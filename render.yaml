@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: reimora
+    env: node
+    plan: free
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: node .output/server/index.mjs
+    envVars:
+      - key: NITRO_PRESET
+        value: render_com
+      - key: NODE_VERSION
+        value: 20
+      - key: VITE_SUPABASE_URL
+        value: https://gkovtgloqxpsgfrvsvug.supabase.co
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        value: sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP
+      - key: VITE_SUPABASE_PROJECT_ID
+        value: gkovtgloqxpsgfrvsvug
+      - key: SUPABASE_URL
+        value: https://gkovtgloqxpsgfrvsvug.supabase.co
+      - key: SUPABASE_PUBLISHABLE_KEY
+        value: sb_publishable_qOd7CsMk_PvbAeZh5qwUVg_FD5zmmvP
+      - key: SUPABASE_PROJECT_ID
+        value: gkovtgloqxpsgfrvsvug
