@@ -18,13 +18,28 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
         <Logo />
         <nav className="hidden items-center gap-7 text-sm font-medium text-muted-foreground md:flex">
-          <a href="/#how" className="hover:text-foreground">How it works</a>
-          <a href="/#features" className="hover:text-foreground">Features</a>
-          <Link to="/demo" className="hover:text-foreground">Demo</Link>
-          <Link to="/about" className="hover:text-foreground">About</Link>
+          <a href="/#how" className="hover:text-foreground">
+            How it works
+          </a>
+          <a href="/#features" className="hover:text-foreground">
+            Features
+          </a>
+          <Link to="/demo" className="hover:text-foreground">
+            Demo
+          </Link>
+          <Link to="/about" className="hover:text-foreground">
+            About
+          </Link>
         </nav>
-        <div className="flex items-center gap-2"><ThemeToggle />
-        <Link to="/auth" className="rounded-full border border-primary/20 px-4 py-2 text-sm font-semibold text-primary disabled:opacity-70">Sign in</Link></div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link
+            to="/auth"
+            className="rounded-full border border-primary/20 px-4 py-2 text-sm font-semibold text-primary disabled:opacity-70"
+          >
+            Sign in
+          </Link>
+        </div>
       </div>
     </header>
   );
@@ -42,7 +57,9 @@ export function SiteFooter() {
           </p>
         </div>
         <div className="flex gap-6 self-end">
-          <Link to="/about" className="hover:text-foreground">About the project</Link>
+          <Link to="/about" className="hover:text-foreground">
+            About the project
+          </Link>
         </div>
       </div>
     </footer>

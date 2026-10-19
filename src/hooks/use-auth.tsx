@@ -16,8 +16,15 @@ export function useMe() {
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("students").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("account_status").select("*").eq("user_id", user.id).maybeSingle(),
-        supabase.from("access_requests").select("*, scopes:scope_id(name, kind)").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("approver_scopes").select("scope_id, scopes(name, kind)").eq("user_id", user.id),
+        supabase
+          .from("access_requests")
+          .select("*, scopes:scope_id(name, kind)")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("approver_scopes")
+          .select("scope_id, scopes(name, kind)")
+          .eq("user_id", user.id),
       ]);
       const failed = [rolesR, profileR, statusR, reqR].find((r) => r.error);
       if (failed?.error) throw failed.error;
@@ -40,7 +47,13 @@ export function useMe() {
         isFaculty: has("faculty"),
         isFinance: has("finance"),
         isStaff: has("faculty") || has("finance"),
-        primaryRole: (isSuperAdmin ? "super_admin" : r.includes("finance") ? "finance" : r.includes("faculty") ? "faculty" : "student") as Role,
+        primaryRole: (isSuperAdmin
+          ? "super_admin"
+          : r.includes("finance")
+            ? "finance"
+            : r.includes("faculty")
+              ? "faculty"
+              : "student") as Role,
       };
     },
     staleTime: 30_000,

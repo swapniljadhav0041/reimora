@@ -36,7 +36,12 @@ export function netSettlement(approvedPaise: number, advancePaise: number): Sett
 }
 
 /** Remaining after partial payments for a settlement outcome. */
-export function outstanding(approvedPaise: number, advancePaise: number, paidToStudent: number, paidByStudent: number) {
+export function outstanding(
+  approvedPaise: number,
+  advancePaise: number,
+  paidToStudent: number,
+  paidByStudent: number,
+) {
   const o = netSettlement(approvedPaise, advancePaise);
   if (o.kind === "payable") return { ...o, remaining: Math.max(0, o.amount - paidToStudent) };
   if (o.kind === "returnable") return { ...o, remaining: Math.max(0, o.amount - paidByStudent) };

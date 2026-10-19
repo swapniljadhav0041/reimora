@@ -8,7 +8,12 @@ import { StudentOnboarding } from "@/components/app/student-onboarding";
 import { ClaimWizard } from "@/components/app/claim-wizard";
 
 export const Route = createFileRoute("/_authenticated/claims/new")({
-  head: () => ({ meta: [{ title: "New claim — Reimora" }, { name: "description", content: "Create a reimbursement claim." }] }),
+  head: () => ({
+    meta: [
+      { title: "New claim — Reimora" },
+      { name: "description", content: "Create a reimbursement claim." },
+    ],
+  }),
   component: NewClaim,
 });
 
@@ -21,7 +26,11 @@ function NewClaim() {
   useEffect(() => {
     if (!me || me.isFinance || !me.student || started.current) return;
     started.current = true;
-    supabase.from("claims").insert({ title: "Untitled claim", student_id: me.student.id, created_by: me.user.id }).select("id").single()
+    supabase
+      .from("claims")
+      .insert({ title: "Untitled claim", student_id: me.student.id, created_by: me.user.id })
+      .select("id")
+      .single()
       .then(({ data, error }) => {
         if (error) return toast.error(errMsg(error));
         nav({ to: "/claims/$id/edit", params: { id: data.id }, replace: true });

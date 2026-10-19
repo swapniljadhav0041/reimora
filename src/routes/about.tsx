@@ -5,9 +5,15 @@ export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — Reimora" },
-      { name: "description", content: "Reimora is a student project on reimbursement and advance settlement." },
+      {
+        name: "description",
+        content: "Reimora is a student project on reimbursement and advance settlement.",
+      },
       { property: "og:title", content: "About — Reimora" },
-      { property: "og:description", content: "A student project on college reimbursement and advance settlement." },
+      {
+        property: "og:description",
+        content: "A student project on college reimbursement and advance settlement.",
+      },
     ],
   }),
   component: About,
@@ -31,8 +37,8 @@ function About() {
           A student project on fair, transparent settlement.
         </h1>
         <p className="mt-6 text-lg text-muted-foreground">
-          Reimora explores how receipt scanning, human review and precise settlement math can
-          make college reimbursements calmer for everyone involved.
+          Reimora explores how receipt scanning, human review and precise settlement math can make
+          college reimbursements calmer for everyone involved.
         </p>
         <dl className="mt-12 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
           {rows.map(([k, v]) => (
@@ -43,7 +49,8 @@ function About() {
           ))}
         </dl>
         <p className="mt-6 rounded-xl bg-warning-soft px-4 py-3 text-sm text-foreground">
-          This is an academic project. It is not endorsed by, or an official system of, the institution.
+          This is an academic project. It is not endorsed by, or an official system of, the
+          institution.
         </p>
       </main>
       <SiteFooter />

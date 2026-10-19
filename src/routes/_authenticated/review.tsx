@@ -4,27 +4,51 @@ import { formatINR } from "@/lib/money";
 import { Card, Empty, PageHeader, StatusBadge } from "@/components/app/ui-bits";
 
 export const Route = createFileRoute("/_authenticated/review")({
-  head: () => ({ meta: [{ title: "Review queue — Reimora" }, { name: "description", content: "Claims awaiting faculty review." }] }),
+  head: () => ({
+    meta: [
+      { title: "Review queue — Reimora" },
+      { name: "description", content: "Claims awaiting faculty review." },
+    ],
+  }),
   component: Review,
 });
 
 function Review() {
   const { data: claims = [] } = useClaims();
-  const queue = claims.filter((c) => c.status === "submitted" || c.status === "under_review")
+  const queue = claims
+    .filter((c) => c.status === "submitted" || c.status === "under_review")
     .sort((a, b) => (a.submitted_at ?? "").localeCompare(b.submitted_at ?? ""));
   return (
     <div>
-      <PageHeader title="Claims to review" sub="Only claims in your assigned departments, clubs or activities. Oldest first." />
-      {queue.length === 0 ? <Empty title="Queue is clear" body="New claims in your scope will appear here. If you expected some, ask the administrator to check your assigned scopes." /> : (
+      <PageHeader
+        title="Claims to review"
+        sub="Only claims in your assigned departments, clubs or activities. Oldest first."
+      />
+      {queue.length === 0 ? (
+        <Empty
+          title="Queue is clear"
+          body="New claims in your scope will appear here. If you expected some, ask the administrator to check your assigned scopes."
+        />
+      ) : (
         <div className="grid gap-3 md:grid-cols-2">
           {queue.map((c) => (
             <Link key={c.id} to="/claims/$id" params={{ id: c.id }}>
               <Card className="p-5 transition hover:-translate-y-0.5 hover:shadow-float">
-                <div className="flex justify-between gap-2"><p className="font-semibold">{c.title}</p><StatusBadge status={c.status} /></div>
-                <p className="text-xs text-muted-foreground">{c.ref} · {c.students?.full_name} · {c.scopes?.name ?? "No scope"}</p>
+                <div className="flex justify-between gap-2">
+                  <p className="font-semibold">{c.title}</p>
+                  <StatusBadge status={c.status} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {c.ref} · {c.students?.full_name} · {c.scopes?.name ?? "No scope"}
+                </p>
                 <div className="mt-3 flex items-end justify-between">
-                  <span className="text-xs text-muted-foreground">{c.expenses.length} expense(s) · submitted {c.submitted_at ? new Date(c.submitted_at).toLocaleDateString("en-IN") : "—"}</span>
-                  <span className="text-lg font-bold tabular text-primary">{formatINR(c.claimed_paise)}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {c.expenses.length} expense(s) · submitted{" "}
+                    {c.submitted_at ? new Date(c.submitted_at).toLocaleDateString("en-IN") : "—"}
+                  </span>
+                  <span className="text-lg font-bold tabular text-primary">
+                    {formatINR(c.claimed_paise)}
+                  </span>
                 </div>
               </Card>
             </Link>

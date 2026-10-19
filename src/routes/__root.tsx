@@ -83,7 +83,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Reimora — AI-Assisted Student Reimbursement and Advance Settlement" },
-      { name: "description", content: "Reimora: AI-Assisted Student Reimbursement and Advance Settlement." },
+      {
+        name: "description",
+        content: "Reimora: AI-Assisted Student Reimbursement and Advance Settlement.",
+      },
       { property: "og:site_name", content: "Reimora" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

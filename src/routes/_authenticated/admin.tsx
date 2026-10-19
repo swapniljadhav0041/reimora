@@ -8,6 +8,12 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const { data: me } = useMe();
-  if (!me?.isSuperAdmin) return <Empty title="Administrator area" body="This section is only available to the Reimora administrator." />;
+  if (!me?.isSuperAdmin)
+    return (
+      <Empty
+        title="Administrator area"
+        body="This section is only available to the Reimora administrator."
+      />
+    );
   return <Outlet />;
 }

@@ -9,7 +9,17 @@ function sniff(bytes: Uint8Array): string | null {
   const h = (i: number) => bytes[i];
   if (h(0) === 0xff && h(1) === 0xd8 && h(2) === 0xff) return "image/jpeg";
   if (h(0) === 0x89 && h(1) === 0x50 && h(2) === 0x4e && h(3) === 0x47) return "image/png";
-  if (h(0) === 0x52 && h(1) === 0x49 && h(2) === 0x46 && h(3) === 0x46 && h(8) === 0x57 && h(9) === 0x45 && h(10) === 0x42 && h(11) === 0x50) return "image/webp";
+  if (
+    h(0) === 0x52 &&
+    h(1) === 0x49 &&
+    h(2) === 0x46 &&
+    h(3) === 0x46 &&
+    h(8) === 0x57 &&
+    h(9) === 0x45 &&
+    h(10) === 0x42 &&
+    h(11) === 0x50
+  )
+    return "image/webp";
   if (h(0) === 0x25 && h(1) === 0x50 && h(2) === 0x44 && h(3) === 0x46) return "application/pdf";
   return null;
 }
@@ -28,20 +38,28 @@ async function sha256Hex(bytes: Uint8Array) {
 export const registerAttachment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((i: unknown) =>
-    z.object({
-      claimId: z.string().uuid(),
-      expenseId: z.string().uuid(),
-      path: z.string().min(5).max(400),
-      fileName: z.string().min(1).max(200),
-      kind: z.enum(["receipt", "upi_screenshot", "supporting"]),
-    }).parse(i),
+    z
+      .object({
+        claimId: z.string().uuid(),
+        expenseId: z.string().uuid(),
+        path: z.string().min(5).max(400),
+        fileName: z.string().min(1).max(200),
+        kind: z.enum(["receipt", "upi_screenshot", "supporting"]),
+      })
+      .parse(i),
   )
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    if (!data.path.startsWith(`${data.claimId}/${data.expenseId}/`)) throw new Error("Invalid upload path");
+    if (!data.path.startsWith(`${data.claimId}/${data.expenseId}/`))
+      throw new Error("Invalid upload path");
     const { data: canEdit } = await supabase.rpc("can_edit_claim", { _claim: data.claimId });
     if (!canEdit) throw new Error("This claim can no longer be edited");
-    const { data: exp } = await supabase.from("expenses").select("id").eq("id", data.expenseId).eq("claim_id", data.claimId).maybeSingle();
+    const { data: exp } = await supabase
+      .from("expenses")
+      .select("id")
+      .eq("id", data.expenseId)
+      .eq("claim_id", data.claimId)
+      .maybeSingle();
     if (!exp) throw new Error("Expense not found");
 
     const { data: blob, error } = await supabase.storage.from("evidence").download(data.path);
@@ -57,7 +75,8 @@ export const registerAttachment = createServerFn({ method: "POST" })
     if (!mime) await reject("Only JPG, PNG, WebP or PDF files are accepted");
     if (mime === "application/pdf") {
       const pages = countPdfPages(bytes);
-      if (pages > MAX_PDF_PAGES) await reject(`PDFs may have at most ${MAX_PDF_PAGES} pages (this one has ${pages})`);
+      if (pages > MAX_PDF_PAGES)
+        await reject(`PDFs may have at most ${MAX_PDF_PAGES} pages (this one has ${pages})`);
     }
     const sha = await sha256Hex(bytes);
 
@@ -65,8 +84,15 @@ export const registerAttachment = createServerFn({ method: "POST" })
     const { data: row, error: insErr } = await supabaseAdmin
       .from("attachments")
       .insert({
-        claim_id: data.claimId, expense_id: data.expenseId, storage_path: data.path, file_name: data.fileName,
-        mime_type: mime!, size_bytes: bytes.length, sha256: sha, kind: data.kind, created_by: context.userId,
+        claim_id: data.claimId,
+        expense_id: data.expenseId,
+        storage_path: data.path,
+        file_name: data.fileName,
+        mime_type: mime!,
+        size_bytes: bytes.length,
+        sha256: sha,
+        kind: data.kind,
+        created_by: context.userId,
       })
       .select()
       .single();
@@ -77,7 +103,9 @@ export const registerAttachment = createServerFn({ method: "POST" })
 // ---------------- AI extraction ----------------
 
 const factsSchema = z.object({
-  document_type: z.enum(["itemized_receipt", "invoice", "upi_screenshot", "bank_slip", "other"]).nullable(),
+  document_type: z
+    .enum(["itemized_receipt", "invoice", "upi_screenshot", "bank_slip", "other"])
+    .nullable(),
   vendor_name: z.string().nullable(),
   amount: z.number().nullable(),
   currency: z.string().nullable(),
@@ -90,14 +118,34 @@ const factsSchema = z.object({
 const resultSchema = z.object({
   documents: z.array(factsSchema.extend({ file_index: z.number() })),
   suggestion: z.object({
-    category: z.enum(["Stationery", "Refreshment", "Rent", "Design Material", "Printing", "Travel", "Equipment", "Other"]).nullable(),
+    category: z
+      .enum([
+        "Stationery",
+        "Refreshment",
+        "Rent",
+        "Design Material",
+        "Printing",
+        "Travel",
+        "Equipment",
+        "Other",
+      ])
+      .nullable(),
     explanation: z.string(),
     confidence: z.enum(["low", "medium", "high"]),
   }),
   missing_or_ambiguous: z.array(z.string()),
 });
 
-const VALID_CATEGORIES: string[] = ["Stationery", "Refreshment", "Rent", "Design Material", "Printing", "Travel", "Equipment", "Other"];
+const VALID_CATEGORIES: string[] = [
+  "Stationery",
+  "Refreshment",
+  "Rent",
+  "Design Material",
+  "Printing",
+  "Travel",
+  "Equipment",
+  "Other",
+];
 const nullable = (t: string) => ({ type: [t, "null"] });
 const jsonSchema = {
   type: "object",
@@ -109,17 +157,34 @@ const jsonSchema = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["file_index", "document_type", "vendor_name", "amount", "currency", "date", "invoice_number", "transaction_reference", "payment_status", "items_or_note"],
+        required: [
+          "file_index",
+          "document_type",
+          "vendor_name",
+          "amount",
+          "currency",
+          "date",
+          "invoice_number",
+          "transaction_reference",
+          "payment_status",
+          "items_or_note",
+        ],
         properties: {
           file_index: { type: "integer" },
-          document_type: { type: ["string", "null"], enum: ["itemized_receipt", "invoice", "upi_screenshot", "bank_slip", "other", null] },
+          document_type: {
+            type: ["string", "null"],
+            enum: ["itemized_receipt", "invoice", "upi_screenshot", "bank_slip", "other", null],
+          },
           vendor_name: nullable("string"),
           amount: nullable("number"),
           currency: nullable("string"),
           date: { type: ["string", "null"], description: "YYYY-MM-DD if visible" },
           invoice_number: nullable("string"),
           transaction_reference: nullable("string"),
-          payment_status: { type: ["string", "null"], enum: ["SUCCESS", "PENDING", "FAILED", null] },
+          payment_status: {
+            type: ["string", "null"],
+            enum: ["SUCCESS", "PENDING", "FAILED", null],
+          },
           items_or_note: nullable("string"),
         },
       },
@@ -129,7 +194,20 @@ const jsonSchema = {
       additionalProperties: false,
       required: ["category", "explanation", "confidence"],
       properties: {
-        category: { type: ["string", "null"], enum: ["Stationery", "Refreshment", "Rent", "Design Material", "Printing", "Travel", "Equipment", "Other", null] },
+        category: {
+          type: ["string", "null"],
+          enum: [
+            "Stationery",
+            "Refreshment",
+            "Rent",
+            "Design Material",
+            "Printing",
+            "Travel",
+            "Equipment",
+            "Other",
+            null,
+          ],
+        },
         explanation: { type: "string" },
         confidence: { type: "string", enum: ["low", "medium", "high"] },
       },
@@ -155,41 +233,71 @@ export const extractExpense = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => z.object({ expenseId: z.string().uuid() }).parse(i))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
-    const { data: exp } = await supabase.from("expenses").select("*").eq("id", data.expenseId).maybeSingle();
+    const { data: exp } = await supabase
+      .from("expenses")
+      .select("*")
+      .eq("id", data.expenseId)
+      .maybeSingle();
     if (!exp) throw new Error("Expense not found");
     const { data: canEdit } = await supabase.rpc("can_edit_claim", { _claim: exp.claim_id });
     if (!canEdit) throw new Error("This claim can no longer be edited");
-    const { data: atts } = await supabase.from("attachments").select("*").eq("expense_id", exp.id).order("created_at");
+    const { data: atts } = await supabase
+      .from("attachments")
+      .select("*")
+      .eq("expense_id", exp.id)
+      .order("created_at");
     if (!atts?.length) throw new Error("Upload a receipt or screenshot first");
 
     const key = process.env["LOVABLE_API_KEY"];
     if (!key) throw new Error("AI scanning is not configured. Enter the details manually.");
 
-    const content: unknown[] = [{ type: "text", text: `There are ${atts.length} file(s) for ONE expense. Extract facts per file.` }];
+    const content: unknown[] = [
+      {
+        type: "text",
+        text: `There are ${atts.length} file(s) for ONE expense. Extract facts per file.`,
+      },
+    ];
     for (const [i, a] of atts.slice(0, 4).entries()) {
       const { data: blob } = await supabase.storage.from("evidence").download(a.storage_path);
       if (!blob) continue;
       const b64 = Buffer.from(await blob.arrayBuffer()).toString("base64");
       const url = `data:${a.mime_type};base64,${b64}`;
       content.push({ type: "text", text: `file_index ${i} (${a.kind}):` });
-      if (a.mime_type === "application/pdf") content.push({ type: "file", file: { filename: a.file_name, file_data: url } });
+      if (a.mime_type === "application/pdf")
+        content.push({ type: "file", file: { filename: a.file_name, file_data: url } });
       else content.push({ type: "image_url", image_url: { url } });
     }
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        "X-Lovable-AIG-SDK": "fetch",
+      },
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
-        messages: [{ role: "system", content: SYSTEM }, { role: "user", content }],
-        response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema: jsonSchema } },
+        messages: [
+          { role: "system", content: SYSTEM },
+          { role: "user", content },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: { name: "extraction", strict: true, schema: jsonSchema },
+        },
       }),
     });
     if (!res.ok) {
       const t = await res.text().catch(() => "");
-      if (res.status === 429) throw new Error("AI scanning is busy right now. Try again shortly or enter details manually.");
-      if (res.status === 402) throw new Error("AI credits are exhausted. Enter the details manually.");
-      throw new Error(`AI scanning failed (${res.status}). Enter the details manually. ${t.slice(0, 120)}`);
+      if (res.status === 429)
+        throw new Error(
+          "AI scanning is busy right now. Try again shortly or enter details manually.",
+        );
+      if (res.status === 402)
+        throw new Error("AI credits are exhausted. Enter the details manually.");
+      throw new Error(
+        `AI scanning failed (${res.status}). Enter the details manually. ${t.slice(0, 120)}`,
+      );
     }
     const body = await res.json();
     const raw = body?.choices?.[0]?.message?.content;
@@ -202,8 +310,16 @@ export const extractExpense = createServerFn({ method: "POST" })
 
     // Merge facts across documents of the same expense (receipt preferred, screenshot for txn ref)
     const docs = parsed.documents;
-    const pick = <K extends keyof (typeof docs)[number]>(k: K) => docs.map((d) => d[k]).find((v) => v != null && v !== "") ?? null;
-    const amounts = [...new Set(docs.map((d) => d.amount).filter((a): a is number => a != null).map((a) => Math.round(a * 100)))];
+    const pick = <K extends keyof (typeof docs)[number]>(k: K) =>
+      docs.map((d) => d[k]).find((v) => v != null && v !== "") ?? null;
+    const amounts = [
+      ...new Set(
+        docs
+          .map((d) => d.amount)
+          .filter((a): a is number => a != null)
+          .map((a) => Math.round(a * 100)),
+      ),
+    ];
     const facts = {
       vendor_name: pick("vendor_name"),
       amount: pick("amount"),
@@ -211,14 +327,22 @@ export const extractExpense = createServerFn({ method: "POST" })
       date: pick("date"),
       invoice_number: pick("invoice_number"),
       transaction_reference: pick("transaction_reference"),
-      payment_status: docs.some((d) => d.payment_status === "FAILED") ? "FAILED" : docs.some((d) => d.payment_status === "PENDING") ? "PENDING" : pick("payment_status"),
+      payment_status: docs.some((d) => d.payment_status === "FAILED")
+        ? "FAILED"
+        : docs.some((d) => d.payment_status === "PENDING")
+          ? "PENDING"
+          : pick("payment_status"),
       items_or_note: pick("items_or_note"),
     };
     const extraction = {
       source: "live_ai",
       model: "google/gemini-3-flash-preview",
       at: new Date().toISOString(),
-      documents: docs.map((d) => ({ ...d, file_name: atts[d.file_index]?.file_name ?? null, kind: atts[d.file_index]?.kind ?? null })),
+      documents: docs.map((d) => ({
+        ...d,
+        file_name: atts[d.file_index]?.file_name ?? null,
+        kind: atts[d.file_index]?.kind ?? null,
+      })),
       facts,
       suggestion: parsed.suggestion,
       missing: parsed.missing_or_ambiguous,
@@ -227,17 +351,26 @@ export const extractExpense = createServerFn({ method: "POST" })
 
     if (exp.extraction == null && !exp.confirmed_at) {
       const validDate = facts.date && /^\d{4}-\d{2}-\d{2}$/.test(facts.date) ? facts.date : null;
-      const { error } = await supabase.from("expenses").update({
-        extraction,
-        extraction_at: extraction.at,
-        vendor: exp.vendor ?? facts.vendor_name,
-        amount_paise: exp.amount_paise ?? (facts.amount != null && facts.amount > 0 ? Math.round(facts.amount * 100) : null),
-        expense_date: exp.expense_date ?? validDate,
-        invoice_no: exp.invoice_no ?? facts.invoice_number,
-        txn_ref: exp.txn_ref ?? facts.transaction_reference,
-        category: exp.category ?? (parsed.suggestion.category && VALID_CATEGORIES.includes(parsed.suggestion.category) ? parsed.suggestion.category : null),
-        description: exp.description || facts.items_or_note || "",
-      }).eq("id", exp.id);
+      const { error } = await supabase
+        .from("expenses")
+        .update({
+          extraction,
+          extraction_at: extraction.at,
+          vendor: exp.vendor ?? facts.vendor_name,
+          amount_paise:
+            exp.amount_paise ??
+            (facts.amount != null && facts.amount > 0 ? Math.round(facts.amount * 100) : null),
+          expense_date: exp.expense_date ?? validDate,
+          invoice_no: exp.invoice_no ?? facts.invoice_number,
+          txn_ref: exp.txn_ref ?? facts.transaction_reference,
+          category:
+            exp.category ??
+            (parsed.suggestion.category && VALID_CATEGORIES.includes(parsed.suggestion.category)
+              ? parsed.suggestion.category
+              : null),
+          description: exp.description || facts.items_or_note || "",
+        })
+        .eq("id", exp.id);
       if (error) throw new Error(error.message);
       return { applied: true, extraction };
     }
@@ -250,7 +383,10 @@ export const extractExpense = createServerFn({ method: "POST" })
 export const processNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data: isFin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "finance" });
+    const { data: isFin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "finance",
+    });
     if (!isFin) throw new Error("Forbidden");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { deliverDue } = await import("./email-outbox.server");
@@ -276,10 +412,25 @@ export const sendTestEmail = createServerFn({ method: "POST" })
     const email = context.claims?.email as string | undefined;
     if (!email) throw new Error("Your account has no email address");
     const { sendGmail, emailHtml, emailConfigured } = await import("./email-outbox.server");
-    if (!emailConfigured()) return { ok: false, error: "Gmail connection is not linked to this project" };
+    if (!emailConfigured())
+      return { ok: false, error: "Gmail connection is not linked to this project" };
     try {
       const subject = "Reimora: Test email";
-      const id = await sendGmail(email, subject, emailHtml({ subject, body: "This is a test from the Email delivery page.\nRecipient: " + email + "\nIf you can read this, Gmail accepted and delivered the message.", kind: "test", claim_id: null, access_request_id: null }), "test-" + Date.now());
+      const id = await sendGmail(
+        email,
+        subject,
+        emailHtml({
+          subject,
+          body:
+            "This is a test from the Email delivery page.\nRecipient: " +
+            email +
+            "\nIf you can read this, Gmail accepted and delivered the message.",
+          kind: "test",
+          claim_id: null,
+          access_request_id: null,
+        }),
+        "test-" + Date.now(),
+      );
       return { ok: true, messageId: id, to: email };
     } catch (e) {
       return { ok: false, error: e instanceof Error ? e.message : "Send failed" };
