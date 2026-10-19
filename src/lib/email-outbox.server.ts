@@ -102,6 +102,7 @@ export function emailHtml(
 
 const b64 = (s: string) =>
   btoa(Array.from(new TextEncoder().encode(s), (b) => String.fromCharCode(b)).join(""));
+const b64url = (s: string) => b64(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 // eslint-disable-next-line no-control-regex
 const mimeHeader = (v: string) => (/^[\x00-\x7F]*$/.test(v) ? v : `=?UTF-8?B?${b64(v)}?=`);
 
