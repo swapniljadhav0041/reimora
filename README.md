@@ -5,6 +5,8 @@
 
 > Modern University Reimbursement & Financial Governance Platform built with TanStack Start, React 19, Tailwind CSS v4, Nitro, and Supabase.
 
+🌐 **Live Website**: [https://reimora.vercel.app](https://reimora.vercel.app)
+
 ---
 
 ## 🚀 One-Click Deployment on Vercel
